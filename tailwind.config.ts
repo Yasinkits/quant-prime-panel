@@ -47,16 +47,43 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        // Trading specific colors
+        trading: {
+          profit: "hsl(var(--trading-profit))",
+          loss: "hsl(var(--trading-loss))",
+          warning: "hsl(var(--trading-warning))",
+          info: "hsl(var(--trading-info))",
+          neutral: "hsl(var(--trading-neutral))",
         },
+        status: {
+          running: "hsl(var(--status-running))",
+          stopped: "hsl(var(--status-stopped))",
+          error: "hsl(var(--status-error))",
+          warning: "hsl(var(--status-warning))",
+        },
+        chart: {
+          grid: "hsl(var(--chart-grid))",
+          axis: "hsl(var(--chart-axis))",
+          bull: "hsl(var(--chart-bull))",
+          bear: "hsl(var(--chart-bear))",
+          volume: "hsl(var(--chart-volume))",
+        },
+      },
+      backgroundImage: {
+        "gradient-profit": "var(--gradient-profit)",
+        "gradient-loss": "var(--gradient-loss)",
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-card": "var(--gradient-card)",
+      },
+      boxShadow: {
+        trading: "var(--shadow-trading)",
+        card: "var(--shadow-card)",
+        "glow-profit": "var(--shadow-glow-profit)",
+        "glow-loss": "var(--shadow-glow-loss)",
+      },
+      transitionProperty: {
+        smooth: "var(--transition-smooth)",
+        fast: "var(--transition-fast)",
       },
       borderRadius: {
         lg: "var(--radius)",
