@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +16,11 @@ import {
   X, 
   Edit, 
   TrendingUp,
-  Clock
+  Clock,
+  Calculator
 } from "lucide-react";
 import { Position } from "@/types/trading";
+import { PositionHelpers } from './PositionHelpers';
 
 interface PositionsTableProps {
   positions: Position[];
@@ -26,6 +29,8 @@ interface PositionsTableProps {
 }
 
 export function PositionsTable({ positions, onClosePosition, onModifyPosition }: PositionsTableProps) {
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
+  const [showHelpers, setShowHelpers] = useState(false);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -130,7 +135,18 @@ export function PositionsTable({ positions, onClosePosition, onModifyPosition }:
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setSelectedPosition(position);
+                            setShowHelpers(true);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Calculator className="w-3 h-3" />
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -156,6 +172,15 @@ export function PositionsTable({ positions, onClosePosition, onModifyPosition }:
           </Table>
         </div>
       </CardContent>
+      
+      <PositionHelpers
+        open={showHelpers}
+        onClose={() => {
+          setShowHelpers(false);
+          setSelectedPosition(null);
+        }}
+        position={selectedPosition || undefined}
+      />
     </Card>
   );
 }

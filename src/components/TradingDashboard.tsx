@@ -5,6 +5,9 @@ import { PositionsTable } from './PositionsTable';
 import { BotConfigPanel } from './BotConfigPanel';
 import { TradingChart } from './TradingChart';
 import { LogViewer } from './LogViewer';
+import { ConnectionStatus } from './ConnectionStatus';
+import { SafetyControls } from './SafetyControls';
+import { AuditLog } from './AuditLog';
 import { useToast } from '@/hooks/use-toast';
 import { 
   mockBotStatus,
@@ -102,6 +105,13 @@ export function TradingDashboard() {
           riskMetrics={mockRiskMetrics}
           signals={mockTradingSignals}
         />
+
+        {/* Connection & Safety Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <ConnectionStatus />
+          <SafetyControls />
+          <AuditLog />
+        </div>
 
         {/* Charts and Positions Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
