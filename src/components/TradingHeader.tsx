@@ -9,7 +9,9 @@ import {
   Power, 
   Settings, 
   TrendingUp, 
-  Zap 
+  Zap,
+  User,
+  LogOut
 } from "lucide-react";
 import { BotStatus, AccountInfo } from "@/types/trading";
 
@@ -18,13 +20,19 @@ interface TradingHeaderProps {
   accountInfo: AccountInfo;
   onToggleBot: () => void;
   onEmergencyStop: () => void;
+  user?: any;
+  profile?: any;
+  onLogout?: () => void;
 }
 
 export function TradingHeader({ 
   botStatus, 
   accountInfo, 
   onToggleBot, 
-  onEmergencyStop 
+  onEmergencyStop,
+  user,
+  profile,
+  onLogout
 }: TradingHeaderProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -120,6 +128,21 @@ export function TradingHeader({
 
         {/* Right Section - Controls */}
         <div className="flex items-center space-x-3">
+          {/* User Info */}
+          {user && (
+            <Card className="px-3 py-2">
+              <div className="flex items-center space-x-2">
+                <User className="w-4 h-4 text-muted-foreground" />
+                <div className="text-right">
+                  <p className="text-sm font-medium">{profile?.full_name || user.email}</p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {profile?.subscription_tier || 'trial'} • {profile?.subscription_status || 'inactive'}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Bot</span>
             <Switch 
@@ -141,6 +164,12 @@ export function TradingHeader({
           <Button variant="ghost" size="sm">
             <Settings className="w-4 h-4" />
           </Button>
+
+          {onLogout && (
+            <Button variant="ghost" size="sm" onClick={onLogout}>
+              <LogOut className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
     </header>

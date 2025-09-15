@@ -9,6 +9,7 @@ import { ConnectionStatus } from './ConnectionStatus';
 import { SafetyControls } from './SafetyControls';
 import { AuditLog } from './AuditLog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   mockBotStatus,
   mockAccountInfo,
@@ -26,6 +27,7 @@ export function TradingDashboard() {
   const [positions, setPositions] = useState<Position[]>(mockPositions);
   const [config, setConfig] = useState<BotConfig>(mockBotConfig);
   const { toast } = useToast();
+  const { user, profile, signOut } = useAuth();
 
   // Simulate real-time updates
   useEffect(() => {
@@ -96,6 +98,9 @@ export function TradingDashboard() {
         accountInfo={accountInfo}
         onToggleBot={handleToggleBot}
         onEmergencyStop={handleEmergencyStop}
+        user={user}
+        profile={profile}
+        onLogout={signOut}
       />
       
       <main className="container mx-auto p-6 space-y-8">
