@@ -14,7 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mt5_credentials: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_connected: boolean | null
+          is_demo: boolean | null
+          last_connection: string | null
+          login: string
+          password_encrypted: string
+          server: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_connected?: boolean | null
+          is_demo?: boolean | null
+          last_connection?: string | null
+          login: string
+          password_encrypted: string
+          server: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_connected?: boolean | null
+          is_demo?: boolean | null
+          last_connection?: string | null
+          login?: string
+          password_encrypted?: string
+          server?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          mt5_demo_only: boolean | null
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          trial_count: number | null
+          trial_sessions_used: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          mt5_demo_only?: boolean | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          trial_count?: number | null
+          trial_sessions_used?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          mt5_demo_only?: boolean | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          trial_count?: number | null
+          trial_sessions_used?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          features: Json
+          id: string
+          max_trial_sessions: number | null
+          name: string
+          price_biweekly: number
+          price_monthly: number
+          tier: string
+        }
+        Insert: {
+          created_at?: string | null
+          features: Json
+          id?: string
+          max_trial_sessions?: number | null
+          name: string
+          price_biweekly: number
+          price_monthly: number
+          tier: string
+        }
+        Update: {
+          created_at?: string | null
+          features?: Json
+          id?: string
+          max_trial_sessions?: number | null
+          name?: string
+          price_biweekly?: number
+          price_monthly?: number
+          tier?: string
+        }
+        Relationships: []
+      }
+      trading_sessions: {
+        Row: {
+          bot_status: string | null
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          profit_loss: number | null
+          session_type: string
+          started_at: string | null
+          total_trades: number | null
+          user_id: string
+        }
+        Insert: {
+          bot_status?: string | null
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          profit_loss?: number | null
+          session_type: string
+          started_at?: string | null
+          total_trades?: number | null
+          user_id: string
+        }
+        Update: {
+          bot_status?: string | null
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          profit_loss?: number | null
+          session_type?: string
+          started_at?: string | null
+          total_trades?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_configs: {
+        Row: {
+          config_name: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+          user_id: string
+          yaml_content: string
+        }
+        Insert: {
+          config_name?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id: string
+          yaml_content: string
+        }
+        Update: {
+          config_name?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+          yaml_content?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
