@@ -1,143 +1,157 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TradingHeader } from './TradingHeader';
 import { TradingOverview } from './TradingOverview';
-import { PositionsTable } from './PositionsTable';
-import { BotConfigPanel } from './BotConfigPanel';
 import { TradingChart } from './TradingChart';
+import { PositionsTable } from './PositionsTable';
 import { LogViewer } from './LogViewer';
-import { ConnectionStatus } from './ConnectionStatus';
-import { SafetyControls } from './SafetyControls';
 import { AuditLog } from './AuditLog';
-import { useToast } from '@/hooks/use-toast';
+import { BotConfigPanel } from './BotConfigPanel';
+import { SafetyControls } from './SafetyControls';
+import { ConnectionStatus } from './ConnectionStatus';
+import { MT5LoginModal } from './MT5LoginModal';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  mockBotStatus,
-  mockAccountInfo,
-  mockPositions,
-  mockBotConfig,
-  mockRiskMetrics,
-  mockTradingSignals,
-  mockLogEntries
-} from '@/data/mockData';
-import { BotStatus, AccountInfo, Position, BotConfig } from '@/types/trading';
+import { useToast } from '@/hooks/use-toast';
+import { mockPositions, mockTrades, mockAccountInfo, mockRiskMetrics, mockTradingSignals, mockLogEntries } from '@/data/mockData';
+import { Position, BotConfig, BotStatus } from '@/types/trading';
 
 export function TradingDashboard() {
-  const [botStatus, setBotStatus] = useState<BotStatus>(mockBotStatus);
-  const [accountInfo, setAccountInfo] = useState<AccountInfo>(mockAccountInfo);
-  const [positions, setPositions] = useState<Position[]>(mockPositions);
-  const [config, setConfig] = useState<BotConfig>(mockBotConfig);
-  const { toast } = useToast();
   const { user, profile, signOut } = useAuth();
+  const { toast } = useToast();
+  const [showMT5Modal, setShowMT5Modal] = useState(false);
+  const [positions, setPositions] = useState<Position[]>(mockPositions);
+  const [botStatus, setBotStatus] = useState<BotStatus>({
+    isRunning: false,
+    mode: 'DEMO',
+    lastUpdate: new Date().toISOString(),
+    connectionStatus: 'DISCONNECTED',
+    uptime: 0
+  });
 
-  // Simulate real-time updates
+  const [botConfig, setBotConfig] = useState<BotConfig>({
+    tradingMode: 'DEMO',
+    symbols: ['EURUSD', 'GBPUSD', 'XAUUSD'],
+    signalMode: 'ai',
+    lotSize: 0.01,
+    riskPerTrade: 2,
+    maxDailyTrades: 10,
+    maxConcurrentPositions: 3,
+    loopInterval: 5,
+    stopLoss: 50,
+    takeProfit: 100,
+    aiConfidenceThreshold: 75,
+    maxDrawdown: 10,
+    dailyLossLimit: 100
+  });
+
+  // Simulate real-time price updates
   useEffect(() => {
     const interval = setInterval(() => {
-      // Update account info with small random changes
-      setAccountInfo(prev => ({
-        ...prev,
-        equity: prev.balance + Math.random() * 1000 - 500,
-        dailyPnL: prev.dailyPnL + (Math.random() - 0.5) * 10
-      }));
-
-      // Update position prices with small random movements
-      setPositions(prev => prev.map(pos => ({
-        ...pos,
-        currentPrice: pos.currentPrice + (Math.random() - 0.5) * 0.0010,
-        pnl: pos.pnl + (Math.random() - 0.5) * 20
-      })));
-    }, 3000);
+      setPositions(prevPositions => 
+        prevPositions.map(pos => ({
+          ...pos,
+          currentPrice: pos.currentPrice + (Math.random() - 0.5) * 0.0001,
+          pnl: pos.pnl + (Math.random() - 0.5) * 10,
+          pnlPips: pos.pnlPips + (Math.random() - 0.5) * 2
+        }))
+      );
+    }, 2000);
 
     return () => clearInterval(interval);
   }, []);
-
-  const handleToggleBot = () => {
-    setBotStatus(prev => ({ ...prev, isRunning: !prev.isRunning }));
-    toast({
-      title: botStatus.isRunning ? "Bot Stopped" : "Bot Started",
-      description: botStatus.isRunning 
-        ? "Trading bot has been stopped safely" 
-        : "Trading bot is now running",
-    });
-  };
-
-  const handleEmergencyStop = () => {
-    setBotStatus(prev => ({ ...prev, isRunning: false }));
-    toast({
-      title: "Emergency Stop Activated",
-      description: "All trading activities have been halted immediately",
-      variant: "destructive",
-    });
-  };
 
   const handleClosePosition = (id: string) => {
     setPositions(prev => prev.filter(pos => pos.id !== id));
     toast({
       title: "Position Closed",
-      description: "Position has been closed successfully",
+      description: `Position ${id} has been closed successfully`,
     });
   };
 
   const handleModifyPosition = (id: string) => {
     toast({
-      title: "Position Modification",
-      description: "Position modification panel would open here",
+      title: "Modify Position",
+      description: `Opening modification dialog for position ${id}`,
     });
   };
 
-  const handleSaveConfig = () => {
+  const handleStartBot = () => {
+    setBotStatus(prev => ({
+      ...prev,
+      isRunning: true,
+      connectionStatus: 'CONNECTED',
+      lastUpdate: new Date().toISOString()
+    }));
     toast({
-      title: "Configuration Saved",
-      description: "Bot configuration has been updated successfully",
+      title: "Bot Started",
+      description: "Prime AI Bot is now running in " + botConfig.tradingMode + " mode",
+    });
+  };
+
+  const handleStopBot = () => {
+    setBotStatus(prev => ({
+      ...prev,
+      isRunning: false,
+      connectionStatus: 'DISCONNECTED'
+    }));
+    toast({
+      title: "Bot Stopped",
+      description: "Prime AI Bot has been stopped",
+      variant: "destructive"
     });
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <TradingHeader
-        botStatus={botStatus}
-        accountInfo={accountInfo}
-        onToggleBot={handleToggleBot}
-        onEmergencyStop={handleEmergencyStop}
-        user={user}
-        profile={profile}
-        onLogout={signOut}
+    <div className="min-h-screen bg-background text-foreground">
+      <TradingHeader 
+        user={user} 
+        profile={profile} 
+        onSignOut={signOut}
+        onMT5Connect={() => setShowMT5Modal(true)}
       />
       
-      <main className="container mx-auto p-6 space-y-8">
-        {/* Overview Cards */}
-        <TradingOverview
-          accountInfo={accountInfo}
-          riskMetrics={mockRiskMetrics}
-          signals={mockTradingSignals}
-        />
-
-        {/* Connection & Safety Controls */}
+      <div className="p-6 space-y-6">
+        {/* Top Row - Status and Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <ConnectionStatus />
+          <ConnectionStatus 
+            botStatus={botStatus}
+            onStart={handleStartBot}
+            onStop={handleStopBot}
+          />
+          <TradingOverview 
+            accountInfo={mockAccountInfo}
+            riskMetrics={mockRiskMetrics}
+            signals={mockTradingSignals}
+          />
           <SafetyControls />
-          <AuditLog />
         </div>
 
-        {/* Charts and Positions Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <TradingChart symbols={['EURUSD', 'GBPUSD', 'USDJPY']} />
-          <PositionsTable
-            positions={positions}
-            onClosePosition={handleClosePosition}
-            onModifyPosition={handleModifyPosition}
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
+          <BotConfigPanel 
+            config={botConfig}
+            onChange={setBotConfig}
           />
         </div>
 
-        {/* Configuration Panel */}
-        <BotConfigPanel
-          config={config}
-          onConfigChange={setConfig}
-          onSaveConfig={handleSaveConfig}
+        {/* Positions and Trading Data */}
+        <PositionsTable 
+          positions={positions}
+          onClosePosition={handleClosePosition}
+          onModifyPosition={handleModifyPosition}
         />
 
-        {/* Log Viewer */}
-        <LogViewer logs={mockLogEntries} />
-      </main>
+        {/* Monitoring */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <LogViewer logs={mockLogEntries} />
+          <AuditLog />
+        </div>
+      </div>
+
+      <MT5LoginModal 
+        open={showMT5Modal}
+        onClose={() => setShowMT5Modal(false)}
+      />
     </div>
   );
 }

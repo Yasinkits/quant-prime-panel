@@ -83,25 +83,46 @@ const Landing = () => {
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-5xl font-bold mb-6">
-            Trust Prime AI Bot
+            Welcome to PRIME AI BOT
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
             Advanced AI-powered trading robot. 1.1K traders rely on us.
           </p>
           
-          {/* Live Prices */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
-            {mockPrices.map((item) => (
-              <Card key={item.pair} className="bg-card">
-                <CardContent className="p-4 text-center">
-                  <div className="font-semibold">{item.pair}</div>
-                  <div className="text-lg font-bold">{item.price}</div>
-                  <Badge variant={item.positive ? "default" : "destructive"}>
-                    {item.change}
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Content Layout */}
+          <div className="flex flex-col lg:flex-row gap-12 mb-12">
+            {/* Popular Pairs - Left Side */}
+            <div className="lg:w-1/3">
+              <h3 className="text-2xl font-bold mb-6">Popular</h3>
+              <div className="space-y-4">
+                {mockPrices.map((item) => (
+                  <Card key={item.pair} className="bg-card">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">{item.pair}</div>
+                          <div className="text-lg font-bold">{item.price}</div>
+                        </div>
+                        <Badge variant={item.positive ? "default" : "destructive"}>
+                          {item.change}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Content - Right Side */}
+            <div className="lg:w-2/3 flex flex-col justify-center">
+              <div className="text-center">
+                <div className="text-6xl font-bold text-primary mb-6">1.1K+</div>
+                <p className="text-2xl mb-4">Active Traders</p>
+                <p className="text-lg text-muted-foreground mb-8">
+                  Join thousands of successful traders using our AI-powered platform
+                </p>
+              </div>
+            </div>
           </div>
 
           <Button 
@@ -149,9 +170,75 @@ const Landing = () => {
           <Card className="inline-block">
             <CardContent className="p-8">
               <div className="text-6xl font-bold text-primary mb-4">FBS</div>
-              <p className="text-muted-foreground">Trusted forex broker partner</p>
+              <p className="text-muted-foreground mb-6">Trusted forex broker partner</p>
+              <Button 
+                size="lg"
+                onClick={() => window.open('https://fbs.com/promo/partner-link-demo', '_blank')}
+                className="shadow-glow-profit"
+              >
+                Open FBS Account
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Risk Warning: Trading involves substantial risk of loss
+              </p>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <h3 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">How does Prime AI Bot work?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Prime AI Bot uses advanced machine learning algorithms to analyze market data, 
+                  identify trading opportunities, and execute trades automatically on your MT5 account.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Is my capital safe?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  We provide multiple safety controls including stop-loss orders, daily loss limits, 
+                  and emergency stop features. However, all trading involves risk of loss.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Can I use demo accounts?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Yes! We strongly recommend starting with a demo account to test the bot's 
+                  performance and familiarize yourself with the platform before going live.
+                </CardDescription>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">What brokers are supported?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Prime AI Bot works with most MT5-compatible brokers. We recommend FBS 
+                  for optimal performance, but you can use any reputable MT5 broker.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 

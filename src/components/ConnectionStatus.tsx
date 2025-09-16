@@ -1,147 +1,152 @@
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
+  Play, 
+  Pause, 
   Wifi, 
   WifiOff, 
-  Settings, 
   Activity,
-  Timer,
+  Clock,
   Zap
 } from "lucide-react";
-import { MT5LoginModal } from './MT5LoginModal';
+import { BotStatus } from "@/types/trading";
 
-interface ConnectionInfo {
-  isConnected: boolean;
-  account: string;
-  balance: number;
-  leverage: string;
-  server: string;
-  lastHeartbeat: string;
-  latency: number;
-  reconnectAttempts: number;
+interface ConnectionStatusProps {
+  botStatus: BotStatus;
+  onStart: () => void;
+  onStop: () => void;
 }
 
-export function ConnectionStatus() {
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [connectionInfo] = useState<ConnectionInfo>({
-    isConnected: true,
-    account: "12345678",
-    balance: 50000.00,
-    leverage: "1:500",
-    server: "MetaQuotes-Demo",
-    lastHeartbeat: "2 seconds ago",
-    latency: 12,
-    reconnectAttempts: 0
-  });
+export function ConnectionStatus({ botStatus, onStart, onStop }: ConnectionStatusProps) {
+  const getStatusColor = () => {
+    switch (botStatus.connectionStatus) {
+      case 'CONNECTED':
+        return 'text-trading-profit';
+      case 'ERROR':
+        return 'text-trading-loss';
+      default:
+        return 'text-muted-foreground';
+    }
+  };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    }).format(amount);
+  const getStatusIcon = () => {
+    switch (botStatus.connectionStatus) {
+      case 'CONNECTED':
+        return <Wifi className="w-4 h-4" />;
+      case 'ERROR':
+        return <WifiOff className="w-4 h-4" />;
+      default:
+        return <WifiOff className="w-4 h-4" />;
+    }
+  };
+
+  const formatUptime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
   };
 
   return (
-    <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div>
-            <CardTitle className="text-base font-medium">MT5 Connection</CardTitle>
-            <CardDescription>Account & Server Status</CardDescription>
+    <Card className="bg-gradient-card border-border shadow-card">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Activity className="w-5 h-5" />
+            <span>Bot Status</span>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setShowLoginModal(true)}
+          <Badge 
+            variant={botStatus.isRunning ? "default" : "secondary"}
+            className={botStatus.isRunning ? "shadow-glow-profit" : ""}
           >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Connection Status */}
+            {botStatus.isRunning ? 'RUNNING' : 'STOPPED'}
+          </Badge>
+        </CardTitle>
+        <CardDescription>
+          Current bot status and controls
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Connection Status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className={getStatusColor()}>
+              {getStatusIcon()}
+            </div>
+            <span className="text-sm">MT5 Connection</span>
+          </div>
+          <Badge 
+            variant="outline" 
+            className={`${getStatusColor()} border-current`}
+          >
+            {botStatus.connectionStatus}
+          </Badge>
+        </div>
+
+        {/* Trading Mode */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Zap className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm">Trading Mode</span>
+          </div>
+          <Badge variant={botStatus.mode === 'REAL' ? "destructive" : "secondary"}>
+            {botStatus.mode}
+          </Badge>
+        </div>
+
+        {/* Uptime */}
+        {botStatus.isRunning && (
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {connectionInfo.isConnected ? (
-                <>
-                  <Wifi className="h-4 w-4 text-trading-profit" />
-                  <Badge variant="default" className="bg-trading-profit/10 text-trading-profit border-trading-profit/20">
-                    Connected
-                  </Badge>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="h-4 w-4 text-trading-loss" />
-                  <Badge variant="destructive">Disconnected</Badge>
-                </>
-              )}
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">Uptime</span>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Account</p>
-              <p className="font-mono text-sm">{connectionInfo.account}</p>
-            </div>
+            <span className="text-sm font-mono">{formatUptime(botStatus.uptime)}</span>
           </div>
+        )}
 
-          {/* Account Details */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Balance</p>
-              <p className="font-semibold">{formatCurrency(connectionInfo.balance)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Leverage</p>
-              <p className="font-semibold">{connectionInfo.leverage}</p>
-            </div>
+        {/* Last Update */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Last Update</span>
+          <span className="text-xs font-mono">
+            {new Date(botStatus.lastUpdate).toLocaleTimeString()}
+          </span>
+        </div>
+
+        {/* Control Buttons */}
+        <div className="pt-4 border-t">
+          {botStatus.isRunning ? (
+            <Button 
+              onClick={onStop}
+              variant="destructive" 
+              className="w-full shadow-glow-loss"
+            >
+              <Pause className="w-4 h-4 mr-2" />
+              Stop Bot
+            </Button>
+          ) : (
+            <Button 
+              onClick={onStart}
+              className="w-full shadow-glow-profit"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Start Bot
+            </Button>
+          )}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+          <div className="text-center">
+            <div className="text-lg font-bold text-trading-profit">+$247</div>
+            <div className="text-xs text-muted-foreground">Today's P&L</div>
           </div>
-
-          {/* Server & Health */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Server</span>
-              <span className="font-mono">{connectionInfo.server}</span>
-            </div>
-            
-            {connectionInfo.isConnected && (
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Activity className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">Last Heartbeat</span>
-                  </div>
-                  <span>{connectionInfo.lastHeartbeat}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Timer className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">Latency</span>
-                  </div>
-                  <span className={connectionInfo.latency < 50 ? 'text-trading-profit' : 'text-yellow-500'}>
-                    {connectionInfo.latency}ms
-                  </span>
-                </div>
-                
-                {connectionInfo.reconnectAttempts > 0 && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1">
-                      <Zap className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-muted-foreground">Reconnect Attempts</span>
-                    </div>
-                    <span className="text-yellow-500">{connectionInfo.reconnectAttempts}</span>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="text-center">
+            <div className="text-lg font-bold">12</div>
+            <div className="text-xs text-muted-foreground">Trades Today</div>
           </div>
-        </CardContent>
-      </Card>
-
-      <MT5LoginModal 
-        open={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
-    </>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
