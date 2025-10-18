@@ -9,6 +9,7 @@ import { BotConfigPanel } from './BotConfigPanel';
 import { SafetyControls } from './SafetyControls';
 import { ConnectionStatus } from './ConnectionStatus';
 import { MT5LoginModal } from './MT5LoginModal';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { mockPositions, mockTrades, mockAccountInfo, mockRiskMetrics, mockTradingSignals, mockLogEntries } from '@/data/mockData';
@@ -100,52 +101,73 @@ export function TradingDashboard() {
     });
   };
 
+  const canStartBot = profile?.subscription_tier !== 'basic';
+  const isTrialExpired = profile?.subscription_tier === 'trial' && 
+    (profile?.trial_sessions_used || 0) >= 2;
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background">
       <TradingHeader 
-        user={user} 
-        profile={profile} 
+        user={user}
+        profile={profile}
         onSignOut={signOut}
         onMT5Connect={() => setShowMT5Modal(true)}
       />
       
-      <div className="p-6 space-y-6">
-        {/* Top Row - Status and Controls */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <ConnectionStatus 
-            botStatus={botStatus}
-            onStart={handleStartBot}
-            onStop={handleStopBot}
-          />
-          <TradingOverview 
-            accountInfo={mockAccountInfo}
-            riskMetrics={mockRiskMetrics}
-            signals={mockTradingSignals}
-          />
-          <SafetyControls />
+      <div className="container mx-auto p-6">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Column - Bot Status & Safety */}
+          <div className="col-span-12 lg:col-span-3 space-y-6">
+            <ConnectionStatus 
+              botStatus={botStatus} 
+              onStart={handleStartBot}
+              onStop={handleStopBot}
+              canStartBot={canStartBot}
+              subscriptionTier={profile?.subscription_tier}
+            />
+            
+            <SafetyControls />
+          </div>
+
+          {/* Middle Column - Overview & Chart */}
+          <div className="col-span-12 lg:col-span-6 space-y-6">
+            <TradingOverview 
+              accountInfo={mockAccountInfo}
+              riskMetrics={mockRiskMetrics}
+              signals={mockTradingSignals}
+            />
+
+            <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
+
+            <BotConfigPanel 
+              config={botConfig}
+              onChange={setBotConfig}
+            />
+          </div>
+
+          {/* Right Column - Positions & Logs */}
+          <div className="col-span-12 lg:col-span-3 space-y-6">
+            <PositionsTable 
+              positions={positions}
+              onClosePosition={handleClosePosition}
+              onModifyPosition={handleModifyPosition}
+            />
+
+            <LogViewer logs={mockLogEntries} />
+
+            <AuditLog />
+          </div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
-          <BotConfigPanel 
-            config={botConfig}
-            onChange={setBotConfig}
-          />
-        </div>
-
-        {/* Positions and Trading Data */}
-        <PositionsTable 
-          positions={positions}
-          onClosePosition={handleClosePosition}
-          onModifyPosition={handleModifyPosition}
-        />
-
-        {/* Monitoring */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <LogViewer logs={mockLogEntries} />
-          <AuditLog />
-        </div>
+        {isTrialExpired && (
+          <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm">
+            <h3 className="font-semibold mb-2">Trial Expired</h3>
+            <p className="text-sm mb-3">Your 2 trial sessions have been used. Upgrade to continue trading.</p>
+            <Button onClick={() => window.location.href = '/subscriptions'} size="sm">
+              View Plans
+            </Button>
+          </div>
+        )}
       </div>
 
       <MT5LoginModal 

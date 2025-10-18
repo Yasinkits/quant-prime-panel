@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/hooks/use-toast';
@@ -35,33 +35,38 @@ export function MT5LoginModal({ open, onClose }: MT5LoginModalProps) {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    login: '',
+    accountId: '',
     password: '',
     server: ''
   });
 
-  const brokerServers = {
-    demo: [
-      'MetaQuotes-Demo',
-      'FTMO-Demo01',
-      'ICMarkets-Demo01',
-      'Pepperstone-Demo',
-      'OANDA-Demo-1'
-    ],
-    live: [
-      'MetaQuotes-Live',
-      'FTMO-Live01',
-      'ICMarkets-Live01',
-      'Pepperstone-Live',
-      'OANDA-Live-1'
-    ]
-  };
-
   const handleTestConnection = async () => {
-    if (!formData.login || !formData.password || !formData.server) {
+    if (!formData.accountId || !formData.password || !formData.server) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate server matches account type
+    const serverLower = formData.server.toLowerCase();
+    const isDemoServer = serverLower.includes('demo');
+    
+    if (isDemo && !isDemoServer) {
+      toast({
+        title: "Server Mismatch",
+        description: "Demo account must use a demo server",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!isDemo && isDemoServer) {
+      toast({
+        title: "Server Mismatch",
+        description: "Live account must use a live server",
         variant: "destructive"
       });
       return;
@@ -161,12 +166,13 @@ export function MT5LoginModal({ open, onClose }: MT5LoginModalProps) {
           {/* Account Fields */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="login">Account Number</Label>
+              <Label htmlFor="accountId">Account ID / Number</Label>
               <Input
-                id="login"
-                placeholder="Enter your MT5 login"
-                value={formData.login}
-                onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                id="accountId"
+                type="number"
+                placeholder="Enter your MT5 account ID"
+                value={formData.accountId}
+                onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
               />
             </div>
 
@@ -194,21 +200,15 @@ export function MT5LoginModal({ open, onClose }: MT5LoginModalProps) {
 
             <div>
               <Label htmlFor="server">Broker Server</Label>
-              <Select value={formData.server} onValueChange={(value) => setFormData({ ...formData, server: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select broker server" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(isDemo ? brokerServers.demo : brokerServers.live).map((server) => (
-                    <SelectItem key={server} value={server}>
-                      {server}
-                      <Badge variant="outline" className="ml-2 text-xs">
-                        {isDemo ? 'Demo' : 'Live'}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="server"
+                placeholder={isDemo ? "e.g., BrokerName-Demo01" : "e.g., BrokerName-Live01"}
+                value={formData.server}
+                onChange={(e) => setFormData({ ...formData, server: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Must be a {isDemo ? 'demo' : 'live'} server
+              </p>
             </div>
           </div>
 

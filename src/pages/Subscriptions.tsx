@@ -65,27 +65,33 @@ const Subscriptions = () => {
     }
   };
 
-  const handleStartTrial = async (planTier: string) => {
+  const handleStartTrial = async () => {
     if (!user) {
       navigate('/auth');
       return;
     }
 
-    setSubscribing(`trial-${planTier}`);
+    const trialSessionsUsed = profile?.trial_sessions_used || 0;
+    if (trialSessionsUsed >= 2) {
+      toast.error("You've already used your 2 trial sessions");
+      return;
+    }
+
+    setSubscribing('trial');
     
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          subscription_tier: planTier,
+          subscription_tier: 'trial',
           subscription_status: 'active',
-          trial_count: (profile?.trial_count || 0) + 1,
+          subscription_start_date: new Date().toISOString(),
         })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      toast.success('Trial started!');
+      toast.success('Trial started! You have 2 demo sessions.');
       await refreshProfile();
       navigate('/dashboard');
     } catch (error) {
@@ -93,10 +99,6 @@ const Subscriptions = () => {
     } finally {
       setSubscribing('');
     }
-  };
-
-  const canStartTrial = (maxTrialSessions: number) => {
-    return !profile || (profile.trial_count < maxTrialSessions);
   };
 
   if (loading) {
@@ -124,9 +126,18 @@ const Subscriptions = () => {
       {/* Pricing Plans */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">
-            Choose Your Trading Plan
-          </h2>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Choose Your Trading Plan</h2>
+            <p className="text-muted-foreground text-lg mb-4">
+              Select the perfect plan for your trading needs
+            </p>
+            {user && profile && (
+              <p className="text-sm text-muted-foreground">
+                Current plan: <span className="font-semibold capitalize">{profile.subscription_tier || 'None'}</span>
+                {profile.subscription_tier === 'trial' && ` (${2 - (profile.trial_sessions_used || 0)} demo sessions left)`}
+              </p>
+            )}
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {plans.map((plan: any) => (
@@ -138,16 +149,25 @@ const Subscriptions = () => {
                 )}
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="text-3xl font-bold">${plan.price_monthly}</span>
-                      <span className="text-muted-foreground">/month</span>
+                  {plan.price_monthly === 0 ? (
+                    <div className="py-4">
+                      <span className="text-3xl font-bold">Free</span>
+                      <p className="text-sm text-muted-foreground mt-2">2 Demo Sessions</p>
                     </div>
-                    <div>
-                      <span className="text-xl font-semibold">${plan.price_biweekly}</span>
-                      <span className="text-muted-foreground">/2 weeks</span>
+                  ) : (
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-3xl font-bold">${plan.price_monthly}</span>
+                        <span className="text-muted-foreground">/month</span>
+                      </div>
+                      {plan.price_biweekly > 0 && plan.tier !== 'premium' && (
+                        <div>
+                          <span className="text-xl font-semibold">${plan.price_biweekly}</span>
+                          <span className="text-muted-foreground">/2 weeks</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
                 </CardHeader>
                 
                 <CardContent className="space-y-6">
@@ -165,36 +185,38 @@ const Subscriptions = () => {
                       {plan.features.smc_strategy && <li>✓ SMC Strategy</li>}
                       {plan.features.break_retest && <li>✓ Break & Retest</li>}
                       {plan.features.full_automation && <li>✓ Full Automation</li>}
-                      {plan.features.unlimited_demos && <li>✓ Unlimited Demo Sessions</li>}
                     </ul>
                   </div>
 
                   <div className="space-y-2">
-                    <Button 
-                      className="w-full" 
-                      onClick={() => handleSubscribe(plan.tier, true)}
-                      disabled={!!subscribing}
-                    >
-                      {subscribing === plan.tier ? 'Processing...' : 'Subscribe Monthly'}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => handleSubscribe(plan.tier, false)}
-                      disabled={!!subscribing}
-                    >
-                      {subscribing === plan.tier ? 'Processing...' : 'Subscribe Bi-weekly'}
-                    </Button>
-                    
-                    {canStartTrial(plan.max_trial_sessions) && (
+                    {plan.tier === 'basic' && plan.price_monthly === 0 ? (
                       <Button 
-                        variant="ghost" 
+                        onClick={handleStartTrial}
+                        disabled={subscribing === 'trial' || (profile?.trial_sessions_used || 0) >= 2}
                         className="w-full"
-                        onClick={() => handleStartTrial(plan.tier)}
-                        disabled={!!subscribing}
                       >
-                        {subscribing === `trial-${plan.tier}` ? 'Starting...' : `Start Free Trial (${plan.max_trial_sessions - (profile?.trial_count || 0)} left)`}
+                        {subscribing === 'trial' ? 'Starting...' : 'Start Free Trial'}
                       </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => handleSubscribe(plan.tier, true)}
+                          disabled={!!subscribing}
+                        >
+                          {subscribing === plan.tier ? 'Processing...' : `Subscribe - $${plan.price_monthly}/month`}
+                        </Button>
+                        {plan.price_biweekly > 0 && plan.tier !== 'premium' && (
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => handleSubscribe(plan.tier, false)}
+                            disabled={!!subscribing}
+                          >
+                            {subscribing === plan.tier ? 'Processing...' : `Subscribe - $${plan.price_biweekly}/2 weeks`}
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </CardContent>

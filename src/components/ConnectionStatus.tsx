@@ -16,9 +16,11 @@ interface ConnectionStatusProps {
   botStatus: BotStatus;
   onStart: () => void;
   onStop: () => void;
+  canStartBot?: boolean;
+  subscriptionTier?: string;
 }
 
-export function ConnectionStatus({ botStatus, onStart, onStop }: ConnectionStatusProps) {
+export function ConnectionStatus({ botStatus, onStart, onStop, canStartBot = true, subscriptionTier }: ConnectionStatusProps) {
   const getStatusColor = () => {
     switch (botStatus.connectionStatus) {
       case 'CONNECTED':
@@ -114,7 +116,7 @@ export function ConnectionStatus({ botStatus, onStart, onStop }: ConnectionStatu
         </div>
 
         {/* Control Buttons */}
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t space-y-2">
           {botStatus.isRunning ? (
             <Button 
               onClick={onStop}
@@ -125,13 +127,22 @@ export function ConnectionStatus({ botStatus, onStart, onStop }: ConnectionStatu
               Stop Bot
             </Button>
           ) : (
-            <Button 
-              onClick={onStart}
-              className="w-full shadow-glow-profit"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Start Bot
-            </Button>
+            <>
+              <Button 
+                onClick={onStart}
+                disabled={!canStartBot}
+                className="w-full shadow-glow-profit"
+                title={!canStartBot ? 'Upgrade to access bot trading' : ''}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Bot
+              </Button>
+              {!canStartBot && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {subscriptionTier === 'basic' ? 'Upgrade to Pro or Premium' : 'Subscribe to start bot'}
+                </p>
+              )}
+            </>
           )}
         </div>
 
