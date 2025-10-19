@@ -117,32 +117,68 @@ export function ConnectionStatus({ botStatus, onStart, onStop, canStartBot = tru
 
         {/* Control Buttons */}
         <div className="pt-4 border-t space-y-2">
-          {botStatus.isRunning ? (
-            <Button 
-              onClick={onStop}
-              variant="destructive" 
-              className="w-full shadow-glow-loss"
-            >
-              <Pause className="w-4 h-4 mr-2" />
-              Stop Bot
-            </Button>
-          ) : (
+          {subscriptionTier === 'premium' && (
             <>
-              <Button 
-                onClick={onStart}
-                disabled={!canStartBot}
-                className="w-full shadow-glow-profit"
-                title={!canStartBot ? 'Upgrade to access bot trading' : ''}
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Start Bot
-              </Button>
-              {!canStartBot && (
-                <p className="text-xs text-muted-foreground text-center">
-                  {subscriptionTier === 'basic' ? 'Upgrade to Pro or Premium' : 'Subscribe to start bot'}
-                </p>
+              {!botStatus.isRunning ? (
+                <Button 
+                  onClick={onStart}
+                  className="w-full bg-trading-profit hover:bg-trading-profit/90 shadow-glow-profit"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Bot (Full Automation)
+                </Button>
+              ) : (
+                <Button 
+                  onClick={onStop}
+                  variant="destructive"
+                  className="w-full shadow-glow-loss"
+                >
+                  <Pause className="w-4 h-4 mr-2" />
+                  Stop Bot
+                </Button>
               )}
             </>
+          )}
+
+          {subscriptionTier === 'pro' && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground text-center">
+                Configure bot settings in Performance tab before starting
+              </p>
+              {!botStatus.isRunning ? (
+                <Button 
+                  onClick={onStart}
+                  className="w-full bg-trading-profit hover:bg-trading-profit/90 shadow-glow-profit"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Bot
+                </Button>
+              ) : (
+                <Button 
+                  onClick={onStop}
+                  variant="destructive"
+                  className="w-full shadow-glow-loss"
+                >
+                  <Pause className="w-4 h-4 mr-2" />
+                  Stop Bot
+                </Button>
+              )}
+            </div>
+          )}
+
+          {subscriptionTier === 'basic' && (
+            <div className="space-y-2">
+              <Button 
+                disabled
+                className="w-full"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Automated Trading Unavailable
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Upgrade to Pro or Premium for automated trading
+              </p>
+            </div>
           )}
         </div>
 

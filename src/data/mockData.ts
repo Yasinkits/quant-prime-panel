@@ -160,7 +160,10 @@ export const mockAccountInfo = {
   marginLevel: 2847.3,
   dailyPnL: 847.85,
   totalPnL: 2347.85,
-  currency: 'USD'
+  currency: 'USD',
+  openPositions: 3,
+  profit: 2347.85,
+  profitPercentage: 4.70
 };
 
 export const mockRiskMetrics = {

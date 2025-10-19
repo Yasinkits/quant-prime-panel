@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { TradingHeader } from './TradingHeader';
-import { TradingOverview } from './TradingOverview';
+import { DashboardSidebar } from './DashboardSidebar';
+import { MT5StatusIndicator } from './MT5StatusIndicator';
 import { TradingChart } from './TradingChart';
 import { PositionsTable } from './PositionsTable';
-import { LogViewer } from './LogViewer';
-import { AuditLog } from './AuditLog';
 import { BotConfigPanel } from './BotConfigPanel';
 import { SafetyControls } from './SafetyControls';
 import { ConnectionStatus } from './ConnectionStatus';
 import { MT5LoginModal } from './MT5LoginModal';
+import { ManualTradeExecution } from './ManualTradeExecution';
+import { AccountDetailsCard } from './AccountDetailsCard';
+import { PremiumStrategies } from './PremiumStrategies';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { mockPositions, mockTrades, mockAccountInfo, mockRiskMetrics, mockTradingSignals, mockLogEntries } from '@/data/mockData';
+import { mockPositions, mockAccountInfo } from '@/data/mockData';
 import { Position, BotConfig, BotStatus } from '@/types/trading';
 
 export function TradingDashboard() {
@@ -101,78 +102,78 @@ export function TradingDashboard() {
     });
   };
 
-  const canStartBot = profile?.subscription_tier !== 'basic';
-  const isTrialExpired = profile?.subscription_tier === 'trial' && 
+  const canStartBot = profile?.subscription_tier === 'premium' || 
+    (profile?.subscription_tier === 'pro');
+  const isTrialExpired = profile?.subscription_tier === 'basic' && 
     (profile?.trial_sessions_used || 0) >= 2;
+  const isPremium = profile?.subscription_tier === 'premium';
+  const isPro = profile?.subscription_tier === 'pro';
+  const isBasic = profile?.subscription_tier === 'basic';
 
   return (
-    <div className="min-h-screen bg-background">
-      <TradingHeader 
+    <div className="min-h-screen bg-background flex">
+      <DashboardSidebar 
         user={user}
         profile={profile}
         onSignOut={signOut}
-        onMT5Connect={() => setShowMT5Modal(true)}
       />
       
-      <div className="container mx-auto p-6">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left Column - Bot Status & Safety */}
-          <div className="col-span-12 lg:col-span-3 space-y-6">
-            <ConnectionStatus 
-              botStatus={botStatus} 
-              onStart={handleStartBot}
-              onStop={handleStopBot}
-              canStartBot={canStartBot}
-              subscriptionTier={profile?.subscription_tier}
-            />
-            
-            <SafetyControls />
-          </div>
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto p-4 md:p-6 space-y-6">
+          {/* MT5 Status Indicator */}
+          <MT5StatusIndicator isConnected={botStatus.connectionStatus === 'CONNECTED'} />
 
-          {/* Middle Column - Overview & Chart */}
-          <div className="col-span-12 lg:col-span-6 space-y-6">
-            <TradingOverview 
-              accountInfo={mockAccountInfo}
-              riskMetrics={mockRiskMetrics}
-              signals={mockTradingSignals}
-            />
+          {/* Dashboard Content */}
+          <div className="space-y-6">
+            <AccountDetailsCard accountInfo={mockAccountInfo} />
 
-            <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <PositionsTable 
+                  positions={positions}
+                  onClosePosition={handleClosePosition}
+                  onModifyPosition={handleModifyPosition}
+                />
 
-            <BotConfigPanel 
-              config={botConfig}
-              onChange={setBotConfig}
-            />
-          </div>
+                <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
 
-          {/* Right Column - Positions & Logs */}
-          <div className="col-span-12 lg:col-span-3 space-y-6">
-            <PositionsTable 
-              positions={positions}
-              onClosePosition={handleClosePosition}
-              onModifyPosition={handleModifyPosition}
-            />
+                {isBasic && <ManualTradeExecution />}
+              </div>
 
-            <LogViewer logs={mockLogEntries} />
+              <div className="space-y-6">
+                {(isPro || isPremium) && (
+                  <ConnectionStatus 
+                    botStatus={botStatus} 
+                    onStart={handleStartBot}
+                    onStop={handleStopBot}
+                    canStartBot={canStartBot}
+                    subscriptionTier={profile?.subscription_tier}
+                  />
+                )}
 
-            <AuditLog />
+                {isPremium && <PremiumStrategies />}
+                
+                <SafetyControls />
+              </div>
+            </div>
           </div>
         </div>
 
-        {isTrialExpired && (
-           <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm">
-            <h3 className="font-semibold mb-2">Trial Expired</h3>
-            <p className="text-sm mb-3">Your 2 trial sessions have been used. Upgrade to continue trading.</p>
-            <Button onClick={() => window.location.href = '/subscriptions'} size="sm">
-              View Plans
-            </Button>
-          </div>
-        )}
       </div>
+
+      {isTrialExpired && (
+        <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm z-50">
+          <h3 className="font-semibold mb-2">Trial Expired</h3>
+          <p className="text-sm mb-3">Your 2 trial sessions have been used. Upgrade to continue trading.</p>
+          <Button onClick={() => window.location.href = '/subscriptions'} size="sm">
+            View Plans
+          </Button>
+        </div>
+      )}
 
       <MT5LoginModal 
         open={showMT5Modal}
-        onClose={() => setShowMT5Modal(false)}
+        onClose={() => setShowMT5Modal(true)}
       />
     </div>
   );
