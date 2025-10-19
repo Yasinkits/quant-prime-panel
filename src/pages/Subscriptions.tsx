@@ -171,21 +171,101 @@ const Subscriptions = () => {
                 </CardHeader>
                 
                 <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Features:</h4>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
-                      {plan.features.manual_trades && <li>✓ Manual Trading</li>}
-                      {plan.features.risk_management && <li>✓ Risk Management</li>}
-                      {plan.features.trailing_stops && <li>✓ Trailing Stops & Breakeven</li>}
-                      {plan.features.all_pairs && <li>✓ All Currency Pairs</li>}
-                      {plan.features.ai_mode && <li>✓ AI Trading Mode</li>}
-                      {plan.features.auto_lot_sizing && <li>✓ Automatic Lot Sizing</li>}
-                      {plan.features.scalp_strategy && <li>✓ Scalping Strategy</li>}
-                      {plan.features.custom_configs && <li>✓ Custom Configurations</li>}
-                      {plan.features.smc_strategy && <li>✓ SMC Strategy</li>}
-                      {plan.features.break_retest && <li>✓ Break & Retest</li>}
-                      {plan.features.full_automation && <li>✓ Full Automation</li>}
-                    </ul>
+                  <div className="space-y-3">
+                    {plan.tier === 'basic' && (
+                      <>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Manual Trade Execution</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Account Details & Charts</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Safety Controls</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">2 Demo Trial Sessions</span>
+                        </div>
+                      </>
+                    )}
+
+                    {plan.tier === 'pro' && (
+                      <>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm font-medium">Everything in Basic</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">AutoLot Sizing of Trades</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Scalp Trading Mode</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Day Trading Model</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">AI Trading</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Custom Configuration</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Connect 1 MT5 Account</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Bot with Configuration</span>
+                        </div>
+                      </>
+                    )}
+
+                    {plan.tier === 'premium' && (
+                      <>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm font-medium">Everything in Basic & Pro</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Advanced Trading Strategies</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Smart Money Concepts</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Break and Retest Strategy</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Full Automation</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Priority Support</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">Auto Risk Management</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-trading-profit">✓</span>
+                          <span className="text-sm">10 Demo Trial Sessions</span>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="space-y-2">

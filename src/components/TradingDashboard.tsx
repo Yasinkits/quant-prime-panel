@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { TradingHeader } from './TradingHeader';
-import { TradingOverview } from './TradingOverview';
 import { TradingChart } from './TradingChart';
 import { PositionsTable } from './PositionsTable';
-import { LogViewer } from './LogViewer';
-import { AuditLog } from './AuditLog';
 import { BotConfigPanel } from './BotConfigPanel';
 import { SafetyControls } from './SafetyControls';
 import { ConnectionStatus } from './ConnectionStatus';
 import { MT5LoginModal } from './MT5LoginModal';
+import { ManualTradeExecution } from './ManualTradeExecution';
+import { AccountDetailsCard } from './AccountDetailsCard';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { mockPositions, mockTrades, mockAccountInfo, mockRiskMetrics, mockTradingSignals, mockLogEntries } from '@/data/mockData';
+import { mockPositions, mockAccountInfo } from '@/data/mockData';
 import { Position, BotConfig, BotStatus } from '@/types/trading';
+import { LayoutDashboard, Link as LinkIcon, TrendingUp } from 'lucide-react';
 
 export function TradingDashboard() {
   const { user, profile, signOut } = useAuth();
@@ -101,9 +102,13 @@ export function TradingDashboard() {
     });
   };
 
-  const canStartBot = profile?.subscription_tier !== 'basic';
-  const isTrialExpired = profile?.subscription_tier === 'trial' && 
+  const canStartBot = profile?.subscription_tier === 'premium' || 
+    (profile?.subscription_tier === 'pro');
+  const isTrialExpired = profile?.subscription_tier === 'basic' && 
     (profile?.trial_sessions_used || 0) >= 2;
+  const isPremium = profile?.subscription_tier === 'premium';
+  const isPro = profile?.subscription_tier === 'pro';
+  const isBasic = profile?.subscription_tier === 'basic';
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,53 +119,107 @@ export function TradingDashboard() {
         onMT5Connect={() => setShowMT5Modal(true)}
       />
       
-      <div className="container mx-auto p-6">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left Column - Bot Status & Safety */}
-          <div className="col-span-12 lg:col-span-3 space-y-6">
-            <ConnectionStatus 
-              botStatus={botStatus} 
-              onStart={handleStartBot}
-              onStop={handleStopBot}
-              canStartBot={canStartBot}
-              subscriptionTier={profile?.subscription_tier}
-            />
-            
-            <SafetyControls />
-          </div>
+      <div className="container mx-auto p-4 md:p-6">
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="mt5" className="flex items-center gap-2">
+              <LinkIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">MT5 Account</span>
+            </TabsTrigger>
+            <TabsTrigger value="performance" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Performance</span>
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Middle Column - Overview & Chart */}
-          <div className="col-span-12 lg:col-span-6 space-y-6">
-            <TradingOverview 
-              accountInfo={mockAccountInfo}
-              riskMetrics={mockRiskMetrics}
-              signals={mockTradingSignals}
-            />
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <AccountDetailsCard accountInfo={mockAccountInfo} />
 
-            <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <PositionsTable 
+                  positions={positions}
+                  onClosePosition={handleClosePosition}
+                  onModifyPosition={handleModifyPosition}
+                />
 
-            <BotConfigPanel 
-              config={botConfig}
-              onChange={setBotConfig}
-            />
-          </div>
+                <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
 
-          {/* Right Column - Positions & Logs */}
-          <div className="col-span-12 lg:col-span-3 space-y-6">
-            <PositionsTable 
-              positions={positions}
-              onClosePosition={handleClosePosition}
-              onModifyPosition={handleModifyPosition}
-            />
+                {isBasic && <ManualTradeExecution />}
+              </div>
 
-            <LogViewer logs={mockLogEntries} />
+              <div className="space-y-6">
+                {(isPro || isPremium) && (
+                  <ConnectionStatus 
+                    botStatus={botStatus} 
+                    onStart={handleStartBot}
+                    onStop={handleStopBot}
+                    canStartBot={canStartBot}
+                    subscriptionTier={profile?.subscription_tier}
+                  />
+                )}
+                
+                <SafetyControls />
+              </div>
+            </div>
+          </TabsContent>
 
-            <AuditLog />
-          </div>
-        </div>
+          {/* MT5 Account Tab */}
+          <TabsContent value="mt5" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <ConnectionStatus 
+                  botStatus={botStatus} 
+                  onStart={handleStartBot}
+                  onStop={handleStopBot}
+                  canStartBot={canStartBot}
+                  subscriptionTier={profile?.subscription_tier}
+                />
+              </div>
+              
+              <div>
+                <SafetyControls />
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => setShowMT5Modal(true)}
+              className="w-full sm:w-auto"
+            >
+              Configure MT5 Connection
+            </Button>
+          </TabsContent>
+
+          {/* Performance Tab */}
+          <TabsContent value="performance" className="space-y-6">
+            <AccountDetailsCard accountInfo={mockAccountInfo} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
+
+              <PositionsTable 
+                positions={positions}
+                onClosePosition={handleClosePosition}
+                onModifyPosition={handleModifyPosition}
+              />
+            </div>
+
+            {(isPro || isPremium) && (
+              <BotConfigPanel 
+                config={botConfig}
+                onChange={setBotConfig}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
 
         {isTrialExpired && (
-          <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm">
+          <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm z-50">
             <h3 className="font-semibold mb-2">Trial Expired</h3>
             <p className="text-sm mb-3">Your 2 trial sessions have been used. Upgrade to continue trading.</p>
             <Button onClick={() => window.location.href = '/subscriptions'} size="sm">
