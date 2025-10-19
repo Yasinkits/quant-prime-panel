@@ -160,7 +160,7 @@ export function TradingDashboard() {
         </div>
 
         {isTrialExpired && (
-          <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm">
+           <div className="fixed bottom-4 right-4 bg-trading-warning text-black p-4 rounded-lg shadow-lg max-w-sm">
             <h3 className="font-semibold mb-2">Trial Expired</h3>
             <p className="text-sm mb-3">Your 2 trial sessions have been used. Upgrade to continue trading.</p>
             <Button onClick={() => window.location.href = '/subscriptions'} size="sm">
