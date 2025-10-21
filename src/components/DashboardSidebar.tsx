@@ -31,9 +31,9 @@ export function DashboardSidebar({ user, profile, onSignOut }: DashboardSidebarP
   const initials = displayName.charAt(0).toUpperCase();
 
   const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/mt5-account', label: 'MT5 Account', icon: LinkIcon },
-    { to: '/performance', label: 'Performance', icon: TrendingUp },
+    { to: '', label: 'Dashboard', icon: LayoutDashboard },
+    { to: 'mt5-account', label: 'MT5 Account', icon: LinkIcon },
+    { to: 'performance', label: 'Performance', icon: TrendingUp },
   ];
 
   return (

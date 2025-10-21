@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -51,18 +51,14 @@ export function ManualTradeExecution() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="symbol">Symbol</Label>
-            <Select value={symbol} onValueChange={setSymbol}>
-              <SelectTrigger id="symbol">
-                <SelectValue placeholder="Select trading pair" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EURUSD">EUR/USD</SelectItem>
-                <SelectItem value="GBPUSD">GBP/USD</SelectItem>
-                <SelectItem value="USDJPY">USD/JPY</SelectItem>
-                <SelectItem value="XAUUSD">XAU/USD (Gold)</SelectItem>
-                <SelectItem value="BTCUSD">BTC/USD</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              id="symbol"
+              type="text"
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+              placeholder="e.g. EURUSD, GBPUSD"
+              className="uppercase"
+            />
           </div>
 
           <div className="space-y-2">
@@ -74,6 +70,7 @@ export function ManualTradeExecution() {
               value={volume}
               onChange={(e) => setVolume(e.target.value)}
               placeholder="0.1"
+              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
 
@@ -85,6 +82,7 @@ export function ManualTradeExecution() {
               value={stopLoss}
               onChange={(e) => setStopLoss(e.target.value)}
               placeholder="Optional"
+              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
 
@@ -96,6 +94,7 @@ export function ManualTradeExecution() {
               value={takeProfit}
               onChange={(e) => setTakeProfit(e.target.value)}
               placeholder="Optional"
+              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
         </div>
