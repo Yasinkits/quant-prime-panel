@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardSidebar } from './DashboardSidebar';
 import { MT5StatusIndicator } from './MT5StatusIndicator';
@@ -150,23 +150,20 @@ export function TradingDashboard() {
     </div>
   );
 
-  const MT5AccountView = () => (
+  const mt5AccountElement = useMemo(() => (
     <div className="space-y-6">
-      <MT5LoginModal 
-        open={true}
-        onClose={() => {}}
-      />
+      <MT5LoginModal open={true} onClose={() => {}} />
     </div>
-  );
+  ), []);
 
-  const PerformanceView = () => (
+  const performanceElement = useMemo(() => (
     <div className="space-y-6">
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold mb-2">Performance Analytics</h2>
         <p className="text-muted-foreground">Coming Soon</p>
       </div>
     </div>
-  );
+  ), []);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -184,8 +181,8 @@ export function TradingDashboard() {
           {/* Dashboard Content with Routes */}
           <Routes>
             <Route index element={<DashboardView />} />
-            <Route path="mt5-account" element={<MT5AccountView />} />
-            <Route path="performance" element={<PerformanceView />} />
+            <Route path="mt5-account" element={mt5AccountElement} />
+            <Route path="performance" element={performanceElement} />
             <Route path="*" element={<Navigate to="." replace />} />
           </Routes>
         </div>
