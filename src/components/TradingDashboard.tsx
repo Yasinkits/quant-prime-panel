@@ -183,10 +183,10 @@ export function TradingDashboard() {
 
           {/* Dashboard Content with Routes */}
           <Routes>
-            <Route path="/" element={<DashboardView />} />
-            <Route path="/mt5-account" element={<MT5AccountView />} />
-            <Route path="/performance" element={<PerformanceView />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route index element={<DashboardView />} />
+            <Route path="mt5-account" element={<MT5AccountView />} />
+            <Route path="performance" element={<PerformanceView />} />
+            <Route path="*" element={<Navigate to="." replace />} />
           </Routes>
         </div>
       </div>
