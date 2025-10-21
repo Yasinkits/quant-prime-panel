@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardSidebar } from './DashboardSidebar';
 import { MT5StatusIndicator } from './MT5StatusIndicator';
-import { TradingChart } from './TradingChart';
 import { PositionsTable } from './PositionsTable';
 import { BotConfigPanel } from './BotConfigPanel';
 import { SafetyControls } from './SafetyControls';
@@ -19,7 +19,6 @@ import { Position, BotConfig, BotStatus } from '@/types/trading';
 export function TradingDashboard() {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
-  const [showMT5Modal, setShowMT5Modal] = useState(false);
   const [positions, setPositions] = useState<Position[]>(mockPositions);
   const [botStatus, setBotStatus] = useState<BotStatus>({
     isRunning: false,
@@ -104,11 +103,70 @@ export function TradingDashboard() {
 
   const canStartBot = profile?.subscription_tier === 'premium' || 
     (profile?.subscription_tier === 'pro');
-  const isTrialExpired = profile?.subscription_tier === 'basic' && 
+  const isTrialExpired = (profile?.subscription_tier === 'trial' || profile?.subscription_tier === 'basic') && 
     (profile?.trial_sessions_used || 0) >= 2;
   const isPremium = profile?.subscription_tier === 'premium';
   const isPro = profile?.subscription_tier === 'pro';
-  const isBasic = profile?.subscription_tier === 'basic';
+  const isBasicOrTrial = profile?.subscription_tier === 'basic' || profile?.subscription_tier === 'trial';
+
+  const DashboardView = () => (
+    <div className="space-y-6">
+      <AccountDetailsCard accountInfo={mockAccountInfo} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <PositionsTable 
+            positions={positions}
+            onClosePosition={handleClosePosition}
+            onModifyPosition={handleModifyPosition}
+          />
+
+          {isBasicOrTrial && <ManualTradeExecution />}
+        </div>
+
+        <div className="space-y-6">
+          {(isPro || isPremium) && (
+            <ConnectionStatus 
+              botStatus={botStatus} 
+              onStart={handleStartBot}
+              onStop={handleStopBot}
+              canStartBot={canStartBot}
+              subscriptionTier={profile?.subscription_tier}
+            />
+          )}
+
+          {isPro && (
+            <BotConfigPanel 
+              config={botConfig}
+              onChange={setBotConfig}
+            />
+          )}
+
+          {isPremium && <PremiumStrategies />}
+          
+          <SafetyControls />
+        </div>
+      </div>
+    </div>
+  );
+
+  const MT5AccountView = () => (
+    <div className="space-y-6">
+      <MT5LoginModal 
+        open={true}
+        onClose={() => {}}
+      />
+    </div>
+  );
+
+  const PerformanceView = () => (
+    <div className="space-y-6">
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold mb-2">Performance Analytics</h2>
+        <p className="text-muted-foreground">Coming Soon</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -123,42 +181,14 @@ export function TradingDashboard() {
           {/* MT5 Status Indicator */}
           <MT5StatusIndicator isConnected={botStatus.connectionStatus === 'CONNECTED'} />
 
-          {/* Dashboard Content */}
-          <div className="space-y-6">
-            <AccountDetailsCard accountInfo={mockAccountInfo} />
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <PositionsTable 
-                  positions={positions}
-                  onClosePosition={handleClosePosition}
-                  onModifyPosition={handleModifyPosition}
-                />
-
-                <TradingChart symbols={['EURUSD', 'GBPUSD', 'XAUUSD']} />
-
-                {isBasic && <ManualTradeExecution />}
-              </div>
-
-              <div className="space-y-6">
-                {(isPro || isPremium) && (
-                  <ConnectionStatus 
-                    botStatus={botStatus} 
-                    onStart={handleStartBot}
-                    onStop={handleStopBot}
-                    canStartBot={canStartBot}
-                    subscriptionTier={profile?.subscription_tier}
-                  />
-                )}
-
-                {isPremium && <PremiumStrategies />}
-                
-                <SafetyControls />
-              </div>
-            </div>
-          </div>
+          {/* Dashboard Content with Routes */}
+          <Routes>
+            <Route path="/" element={<DashboardView />} />
+            <Route path="/mt5-account" element={<MT5AccountView />} />
+            <Route path="/performance" element={<PerformanceView />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </div>
-
       </div>
 
       {isTrialExpired && (
@@ -170,11 +200,6 @@ export function TradingDashboard() {
           </Button>
         </div>
       )}
-
-      <MT5LoginModal 
-        open={showMT5Modal}
-        onClose={() => setShowMT5Modal(true)}
-      />
     </div>
   );
 }

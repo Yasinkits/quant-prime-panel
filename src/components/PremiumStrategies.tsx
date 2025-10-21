@@ -15,24 +15,21 @@ export function PremiumStrategies() {
       description: 'Key level breakout confirmation strategy'
     },
     {
-      name: 'Advanced Scalping',
+      name: 'Support and Resistance',
       icon: TrendingUp,
-      description: 'High-frequency precision entries and exits'
+      description: 'Key price level identification and trading'
     }
   ];
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Premium Strategies
-          </CardTitle>
-          <Badge variant="secondary">Coming Soon</Badge>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          Advanced Strategies
+        </CardTitle>
         <CardDescription>
-          Advanced trading strategies available exclusively for Premium members
+          Premium advanced trading strategies
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -50,6 +47,10 @@ export function PremiumStrategies() {
             </div>
           </div>
         ))}
+        
+        <div className="text-center pt-2">
+          <Badge variant="secondary" className="text-xs">COMING SOON</Badge>
+        </div>
       </CardContent>
     </Card>
   );
